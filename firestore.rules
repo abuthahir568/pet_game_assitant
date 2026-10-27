@@ -1,0 +1,314 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Safety Net - Default Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp && ts <= request.time;
+    }
+
+    function isValidHex(c) {
+      return c is string && c.size() >= 4 && c.size() <= 12;
+    }
+
+    function isValidPetProfile(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.petName is string && data.petName.size() >= 1 && data.petName.size() <= 40 &&
+             data.animalType is string && data.animalType.size() >= 1 && data.animalType.size() <= 32 &&
+             data.personality is string && data.personality.size() >= 1 && data.personality.size() <= 40 &&
+             data.coins is int && data.coins >= 0 && data.coins <= 10000000 &&
+             (!('furColorHex' in data) || isValidHex(data.furColorHex)) &&
+             (!('eyeColorHex' in data) || isValidHex(data.eyeColorHex)) &&
+             (!('collarColorHex' in data) || isValidHex(data.collarColorHex)) &&
+             (!('equippedHatId' in data) || (data.equippedHatId is string && data.equippedHatId.size() <= 64)) &&
+             (!('equippedOutfitId' in data) || (data.equippedOutfitId is string && data.equippedOutfitId.size() <= 64)) &&
+             (!('equippedToyId' in data) || (data.equippedToyId is string && data.equippedToyId.size() <= 64)) &&
+             (!('hunger' in data) || (data.hunger is int && data.hunger >= 0 && data.hunger <= 100)) &&
+             (!('thirst' in data) || (data.thirst is int && data.thirst >= 0 && data.thirst <= 100)) &&
+             (!('happiness' in data) || (data.happiness is int && data.happiness >= 0 && data.happiness <= 100)) &&
+             (!('energy' in data) || (data.energy is int && data.energy >= 0 && data.energy <= 100)) &&
+             (!('cleanliness' in data) || (data.cleanliness is int && data.cleanliness >= 0 && data.cleanliness <= 100)) &&
+             (!('friendshipXp' in data) || (data.friendshipXp is int && data.friendshipXp >= 0 && data.friendshipXp <= 10000000)) &&
+             (!('friendshipLevel' in data) || (data.friendshipLevel is int && data.friendshipLevel >= 1 && data.friendshipLevel <= 500)) &&
+             (!('preferredLanguage' in data) || (data.preferredLanguage is string && data.preferredLanguage.size() <= 20)) &&
+             (!('voicePitch' in data) || (data.voicePitch is number && data.voicePitch >= 0.4 && data.voicePitch <= 2.2)) &&
+             (!('voiceSpeed' in data) || (data.voiceSpeed is number && data.voiceSpeed >= 0.4 && data.voiceSpeed <= 2.2)) &&
+             (!('userNickname' in data) || (data.userNickname is string && data.userNickname.size() <= 40)) &&
+             (!('dailyRewardEpochDay' in data) || (data.dailyRewardEpochDay is int && data.dailyRewardEpochDay >= 0)) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidPetMemory(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 32 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 1000 &&
+             (!('scheduledEpochMillis' in data) || (data.scheduledEpochMillis is int && data.scheduledEpochMillis >= 0)) &&
+             (!('isCompleted' in data) || data.isCompleted is bool) &&
+             (!('isSensitiveApproved' in data) || data.isSensitiveApproved is bool) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidInventoryItem(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.catalogItemId is string && data.catalogItemId.size() >= 1 && data.catalogItemId.size() <= 64 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 32 &&
+             data.quantity is int && data.quantity >= 0 && data.quantity <= 9999 &&
+             (!('isEquipped' in data) || data.isEquipped is bool) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidCoinTransaction(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.type is string && data.type.size() >= 1 && data.type.size() <= 32 &&
+             data.amount is int && data.amount >= -1000000 && data.amount <= 1000000 &&
+             data.description is string && data.description.size() >= 1 && data.description.size() <= 200 &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    function isValidHomeLayout(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.environmentTheme is string && data.environmentTheme.size() >= 1 && data.environmentTheme.size() <= 40 &&
+             isValidHex(data.wallColorHex) &&
+             isValidHex(data.floorColorHex) &&
+             data.lightingMode is string && data.lightingMode.size() >= 1 && data.lightingMode.size() <= 32 &&
+             (!('placedItems' in data) || (data.placedItems is list && data.placedItems.size() <= 60 && (data.placedItems.size() == 0 || data.placedItems[0] is map))) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidChatMessage(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             (data.sender == 'USER' || data.sender == 'PET') &&
+             data.text is string && data.text.size() >= 1 && data.text.size() <= 4000 &&
+             (!('emotion' in data) || (data.emotion is string && data.emotion.size() <= 32)) &&
+             (!('language' in data) || (data.language is string && data.language.size() <= 20)) &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    function isValidCreatorDesign(data) {
+      return data.creatorId is string &&
+             data.creatorName is string && data.creatorName.size() >= 1 && data.creatorName.size() <= 60 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 80 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 32 &&
+             isValidHex(data.primaryColorHex) &&
+             isValidHex(data.accentColorHex) &&
+             data.priceCoins is int && data.priceCoins >= 10 && data.priceCoins <= 50000 &&
+             (data.moderationStatus == 'APPROVED' || data.moderationStatus == 'PENDING') &&
+             data.downloadsCount is int && data.downloadsCount >= 0 && data.downloadsCount <= 10000000 &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    // Root PetProfile document per user
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll(['userId', 'petName', 'animalType', 'personality', 'coins', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'petName', 'animalType', 'personality', 'furColorHex', 'eyeColorHex', 'collarColorHex',
+                         'equippedHatId', 'equippedOutfitId', 'equippedToyId', 'hunger', 'thirst', 'happiness',
+                         'energy', 'cleanliness', 'friendshipXp', 'friendshipLevel', 'coins', 'preferredLanguage',
+                         'voicePitch', 'voiceSpeed', 'userNickname', 'dailyRewardEpochDay', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidPetProfile(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidPetProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'petName', 'animalType', 'personality', 'furColorHex', 'eyeColorHex', 'collarColorHex',
+                         'equippedHatId', 'equippedOutfitId', 'equippedToyId', 'hunger', 'thirst', 'happiness',
+                         'energy', 'cleanliness', 'friendshipXp', 'friendshipLevel', 'coins', 'preferredLanguage',
+                         'voicePitch', 'voiceSpeed', 'userNickname', 'dailyRewardEpochDay', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Smart Pet Memories & Scheduled Reminders
+      match /memories/{memoryId} {
+        allow get: if isOwner(userId) && isValidId(memoryId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(memoryId) &&
+                         incoming().keys().hasAll(['userId', 'category', 'title', 'content', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'category', 'title', 'content', 'scheduledEpochMillis',
+                           'isCompleted', 'isSensitiveApproved', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidPetMemory(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(memoryId) &&
+                         isValidPetMemory(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'category', 'title', 'content', 'scheduledEpochMillis',
+                           'isCompleted', 'isSensitiveApproved', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(memoryId);
+      }
+
+      // User Pet Inventory
+      match /inventory/{itemId} {
+        allow get: if isOwner(userId) && isValidId(itemId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         incoming().keys().hasAll(['userId', 'catalogItemId', 'name', 'category', 'quantity', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'catalogItemId', 'name', 'category', 'quantity', 'isEquipped', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidInventoryItem(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(itemId) &&
+                         isValidInventoryItem(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'name', 'category', 'quantity', 'isEquipped', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(itemId);
+      }
+
+      // Append-Only Virtual Coin Transaction Ledger
+      match /transactions/{txId} {
+        allow get: if isOwner(userId) && isValidId(txId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(txId) &&
+                         incoming().keys().hasAll(['userId', 'type', 'amount', 'description', 'createdAt']) &&
+                         incoming().keys().hasOnly(['userId', 'type', 'amount', 'description', 'createdAt']) &&
+                         isValidCoinTransaction(incoming());
+
+        allow update: if false;
+        allow delete: if isOwner(userId) && isValidId(txId);
+      }
+
+      // 3D Home Builder Layouts
+      match /home_layouts/{layoutId} {
+        allow get: if isOwner(userId) && isValidId(layoutId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(layoutId) &&
+                         incoming().keys().hasAll(['userId', 'environmentTheme', 'wallColorHex', 'floorColorHex', 'lightingMode', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'environmentTheme', 'wallColorHex', 'floorColorHex', 'lightingMode', 'placedItems', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidHomeLayout(incoming());
+
+        allow update: if isOwner(userId) &&
+                         isValidId(layoutId) &&
+                         isValidHomeLayout(incoming()) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'environmentTheme', 'wallColorHex', 'floorColorHex', 'lightingMode', 'placedItems', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(layoutId);
+      }
+
+      // AI Conversation History
+      match /messages/{msgId} {
+        allow get: if isOwner(userId) && isValidId(msgId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+
+        allow create: if isOwner(userId) &&
+                         isValidId(msgId) &&
+                         incoming().keys().hasAll(['userId', 'sender', 'text', 'createdAt']) &&
+                         incoming().keys().hasOnly(['userId', 'sender', 'text', 'emotion', 'language', 'createdAt']) &&
+                         isValidChatMessage(incoming());
+
+        allow update: if false;
+        allow delete: if isOwner(userId) && isValidId(msgId);
+      }
+    }
+
+    // Creator Studio Community Designs
+    match /creator_designs/{designId} {
+      allow get: if isSignedIn() && isValidId(designId) && (existing().moderationStatus == 'APPROVED' || existing().creatorId == request.auth.uid);
+      allow list: if isSignedIn() && (existing().moderationStatus == 'APPROVED' || existing().creatorId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+                       isValidId(designId) &&
+                       incoming().creatorId == request.auth.uid &&
+                       incoming().downloadsCount == 0 &&
+                       incoming().keys().hasAll([
+                         'creatorId', 'creatorName', 'title', 'category', 'primaryColorHex',
+                         'accentColorHex', 'priceCoins', 'moderationStatus', 'downloadsCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'creatorId', 'creatorName', 'title', 'category', 'primaryColorHex',
+                         'accentColorHex', 'priceCoins', 'moderationStatus', 'downloadsCount', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidCreatorDesign(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(designId) &&
+                       isValidCreatorDesign(incoming()) &&
+                       incoming().creatorId == existing().creatorId &&
+                       incoming().createdAt == existing().createdAt && (
+                         // Action 1: Creator edits their own design
+                         (existing().creatorId == request.auth.uid &&
+                          incoming().downloadsCount == existing().downloadsCount &&
+                          incoming().diff(existing()).affectedKeys().hasOnly([
+                            'title', 'category', 'primaryColorHex', 'accentColorHex', 'priceCoins', 'moderationStatus', 'updatedAt'
+                          ])) ||
+                         // Action 2: Community member adopts approved design (+1 download)
+                         (existing().moderationStatus == 'APPROVED' &&
+                          incoming().downloadsCount == existing().downloadsCount + 1 &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['downloadsCount', 'updatedAt']))
+                       );
+
+      allow delete: if isSignedIn() && isValidId(designId) && existing().creatorId == request.auth.uid;
+    }
+  }
+}

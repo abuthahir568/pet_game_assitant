@@ -1,0 +1,162 @@
+{
+  "entities": {
+    "PetProfile": {
+      "title": "PetProfile",
+      "description": "User virtual pet profile, care stats, wallet balance, language, and friendship state.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "petName": { "type": "string", "description": "Custom name given to the pet" },
+        "animalType": { "type": "string", "description": "Species ID from the 20 animals" },
+        "personality": { "type": "string", "description": "Personality archetype ID" },
+        "furColorHex": { "type": "string", "description": "Hex color of primary fur/coat" },
+        "eyeColorHex": { "type": "string", "description": "Hex color of pet eyes" },
+        "collarColorHex": { "type": "string", "description": "Hex color of collar/scarf" },
+        "equippedHatId": { "type": "string", "description": "Equipped hat or crown item ID" },
+        "equippedOutfitId": { "type": "string", "description": "Equipped outfit or cape item ID" },
+        "equippedToyId": { "type": "string", "description": "Equipped active toy ID" },
+        "hunger": { "type": "integer", "description": "Hunger level 0-100" },
+        "thirst": { "type": "integer", "description": "Thirst level 0-100" },
+        "happiness": { "type": "integer", "description": "Happiness level 0-100" },
+        "energy": { "type": "integer", "description": "Energy level 0-100" },
+        "cleanliness": { "type": "integer", "description": "Cleanliness level 0-100" },
+        "friendshipXp": { "type": "integer", "description": "Cumulative friendship XP" },
+        "friendshipLevel": { "type": "integer", "description": "Friendship level starting at 1" },
+        "coins": { "type": "integer", "description": "Virtual coin balance" },
+        "preferredLanguage": { "type": "string", "description": "BCP-47 language tag" },
+        "voicePitch": { "type": "number", "description": "TTS voice pitch multiplier" },
+        "voiceSpeed": { "type": "number", "description": "TTS speech rate multiplier" },
+        "userNickname": { "type": "string", "description": "Preferred user name or nickname" },
+        "dailyRewardEpochDay": { "type": "integer", "description": "Last claimed daily reward epoch day" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "petName", "animalType", "personality", "coins", "createdAt", "updatedAt"]
+    },
+    "PetMemory": {
+      "title": "PetMemory",
+      "description": "Smart memory saved by PetPal AI with user consent and optional scheduled reminder.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "category": { "type": "string", "description": "Memory category (NAME, BIRTHDAY, FAVORITE, PLAN, GOAL, NOTE)" },
+        "title": { "type": "string", "description": "Short summary title of memory" },
+        "content": { "type": "string", "description": "Full memory content" },
+        "scheduledEpochMillis": { "type": "integer", "description": "0 if no reminder, or future epoch ms" },
+        "isCompleted": { "type": "boolean", "description": "Whether plan/reminder was completed" },
+        "isSensitiveApproved": { "type": "boolean", "description": "Explicit user consent flag" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "category", "title", "content", "createdAt", "updatedAt"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Purchased or unlocked item in the user's pet inventory.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "catalogItemId": { "type": "string", "description": "Shop catalog item identifier" },
+        "name": { "type": "string", "description": "Display name" },
+        "category": { "type": "string", "description": "FOOD, OUTFIT, ACCESSORY, TOY, FURNITURE, DECOR, SKIN" },
+        "quantity": { "type": "integer", "description": "Quantity owned" },
+        "isEquipped": { "type": "boolean", "description": "Whether currently equipped on pet" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "catalogItemId", "name", "category", "quantity", "createdAt", "updatedAt"]
+    },
+    "CoinTransaction": {
+      "title": "CoinTransaction",
+      "description": "Immutable ledger entry for virtual coin earnings and shop purchases.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "type": { "type": "string", "description": "EARN, SPEND, DAILY_REWARD, MINIGAME, CREATOR_SALE" },
+        "amount": { "type": "integer", "description": "Signed or positive coin delta" },
+        "description": { "type": "string", "description": "Human-readable transaction summary" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "type", "amount", "description", "createdAt"]
+    },
+    "HomeLayout": {
+      "title": "HomeLayout",
+      "description": "Saved 3D isometric pet home environment and placed furniture items.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "environmentTheme": { "type": "string", "description": "COZY_HOUSE, SKY_APARTMENT, SUNLIT_GARDEN, FANTASY_CASTLE" },
+        "wallColorHex": { "type": "string", "description": "Hex color of walls" },
+        "floorColorHex": { "type": "string", "description": "Hex color of flooring" },
+        "lightingMode": { "type": "string", "description": "DAYLIGHT, GOLDEN_HOUR, STARLIGHT, NEON_PARTY" },
+        "placedItems": { "type": "string", "description": "Bounded placements list" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "environmentTheme", "wallColorHex", "floorColorHex", "lightingMode", "createdAt", "updatedAt"]
+    },
+    "ChatMessageRecord": {
+      "title": "ChatMessageRecord",
+      "description": "Saved conversation message between user and AI pet best friend.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "sender": { "type": "string", "description": "USER or PET" },
+        "text": { "type": "string", "description": "Message text" },
+        "emotion": { "type": "string", "description": "Detected or expressed emotion tag" },
+        "language": { "type": "string", "description": "Language tag" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["userId", "sender", "text", "createdAt"]
+    },
+    "CreatorDesign": {
+      "title": "CreatorDesign",
+      "description": "User-authored custom virtual pet item in Creator Studio.",
+      "type": "object",
+      "properties": {
+        "creatorId": { "type": "string", "description": "Creator Firebase Auth UID" },
+        "creatorName": { "type": "string", "description": "Creator display name" },
+        "title": { "type": "string", "description": "Item title" },
+        "category": { "type": "string", "description": "OUTFIT, ACCESSORY, TOY, FURNITURE, DECOR" },
+        "primaryColorHex": { "type": "string", "description": "Primary hex color" },
+        "accentColorHex": { "type": "string", "description": "Accent hex color" },
+        "priceCoins": { "type": "integer", "description": "Price in virtual coins" },
+        "moderationStatus": { "type": "string", "description": "APPROVED, PENDING" },
+        "downloadsCount": { "type": "integer", "description": "Number of community adoptions" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp" }
+      },
+      "required": ["creatorId", "creatorName", "title", "category", "primaryColorHex", "accentColorHex", "priceCoins", "moderationStatus", "downloadsCount", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/PetProfile" },
+      "description": "Root user and active virtual pet profile document."
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": { "$ref": "#/entities/PetMemory" },
+      "description": "Persistent AI memories and scheduled reminders owned by userId."
+    },
+    "/users/{userId}/inventory/{itemId}": {
+      "schema": { "$ref": "#/entities/InventoryItem" },
+      "description": "Owned virtual pet items and equipment state."
+    },
+    "/users/{userId}/transactions/{txId}": {
+      "schema": { "$ref": "#/entities/CoinTransaction" },
+      "description": "Append-only virtual coin transaction history."
+    },
+    "/users/{userId}/home_layouts/{layoutId}": {
+      "schema": { "$ref": "#/entities/HomeLayout" },
+      "description": "Saved 3D home builder configurations."
+    },
+    "/users/{userId}/messages/{msgId}": {
+      "schema": { "$ref": "#/entities/ChatMessageRecord" },
+      "description": "Conversation history with AI pet friend."
+    },
+    "/creator_designs/{designId}": {
+      "schema": { "$ref": "#/entities/CreatorDesign" },
+      "description": "Community creator virtual pet items."
+    }
+  }
+}

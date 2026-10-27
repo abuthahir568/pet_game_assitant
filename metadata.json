@@ -1,0 +1,6 @@
+{
+  "name": "PetPal AI",
+  "description": "Interactive animated virtual pet best friend with real-time multilingual voice AI, smart memory, pet care, home builder, shop, and mini-games.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

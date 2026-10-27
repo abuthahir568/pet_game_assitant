@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PetPal AI</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="welcome_title">Meet Your Living 3D Best Friend</string>
+    <string name="welcome_subtitle">Talk in 12+ languages, share daily laughs, save smart memories, decorate a 3D sanctuary, and play together anytime.</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_talk">Voice AI</string>
+    <string name="nav_memory">Memories</string>
+    <string name="nav_shop">Shop</string>
+    <string name="nav_arcade">Play &amp; Build</string>
+    <string name="care_feed">Feed</string>
+    <string name="care_water">Water</string>
+    <string name="care_bathe">Bath</string>
+    <string name="care_brush">Brush</string>
+    <string name="care_play">Play</string>
+    <string name="care_sleep">Sleep</string>
+    <string name="mic_speak">Tap to Speak</string>
+    <string name="mic_listening">Listening…</string>
+    <string name="virtual_coins_disclaimer">PetCoins are earned through care, daily check-ins, and mini-games. They are virtual gameplay currency only and have no real-world monetary value.</string>
+</resources>
